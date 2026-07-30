@@ -1,0 +1,23 @@
+# Virtual environment
+ai-video/
+.venv/
+venv/
+
+# Python cache
+__pycache__/
+*.pyc
+
+# VS Code
+.vscode/
+
+# ChromaDB
+vector_db/
+
+# Downloads
+downloades/
+
+# Temporary files
+tempCodeRunnerFile.txt
+
+# Environment variables
+.env
