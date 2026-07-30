@@ -61,11 +61,6 @@ def download_youtube_audio(url: str) -> str:
             }
         ],
         "quiet": True,
-        "extractor_args": {
-            "youtube": {
-                "player_client": ["tv", "web", "android"],
-            }
-        },
     }
 
     if cookie_file:
