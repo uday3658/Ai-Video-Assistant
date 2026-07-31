@@ -3,6 +3,7 @@ from langchain_chroma import Chroma
 from langchain_community.embeddings import HuggingFaceEmbeddings
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 from langchain_core.documents import Document
+import shutil
 
 CHROMA_DIR = "vector_db"
 COLLECTION_NAME = "meeting_transcript"
@@ -14,26 +15,56 @@ def get_embeddings():
         model_kwargs = {"device" : 'cpu'}
     )
 
-def build_vector_store(transcript : str)->Chroma:
-    print("Building vector Store")
+# def build_vector_store(transcript : str)->Chroma:
+#     print("Building vector Store")
+
+#     splitter = RecursiveCharacterTextSplitter(
+#         chunk_size = 500,
+#         chunk_overlap = 50
+#     )
+#     chunks = splitter.split_text(transcript)
+
+#     docs = [
+#         Document(page_content=chunk, metadata = {'chunk_index' : i})
+#         for i,chunk in enumerate(chunks)
+#     ]
+
+#     embeddings = get_embeddings()
+#     vector_store = Chroma.from_documents(
+#         documents= docs,
+#         embedding=embeddings,
+#         collection_name=COLLECTION_NAME,
+#         persist_directory=CHROMA_DIR
+#     )
+
+#     return vector_store
+
+def build_vector_store(transcript: str) -> Chroma:
+    print("Building Vector Store")
+
+    # Delete old vector database
+    if os.path.exists(CHROMA_DIR):
+        shutil.rmtree(CHROMA_DIR)
 
     splitter = RecursiveCharacterTextSplitter(
-        chunk_size = 500,
-        chunk_overlap = 50
+        chunk_size=500,
+        chunk_overlap=50
     )
+
     chunks = splitter.split_text(transcript)
 
     docs = [
-        Document(page_content=chunk, metadata = {'chunk_index' : i})
-        for i,chunk in enumerate(chunks)
+        Document(page_content=chunk, metadata={"chunk_index": i})
+        for i, chunk in enumerate(chunks)
     ]
 
     embeddings = get_embeddings()
+
     vector_store = Chroma.from_documents(
-        documents= docs,
+        documents=docs,
         embedding=embeddings,
         collection_name=COLLECTION_NAME,
-        persist_directory=CHROMA_DIR
+        persist_directory=CHROMA_DIR,
     )
 
     return vector_store

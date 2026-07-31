@@ -2,6 +2,7 @@ import yt_dlp
 from yt_dlp.utils import DownloadError
 from pydub import AudioSegment
 import os
+import shutil  
 # import imageio_ffmpeg
 # AudioSegment.converter = imageio_ffmpeg.get_ffmpeg_exe()
 # AudioSegment.ffprobe = imageio_ffmpeg.get_ffmpeg_exe()
@@ -9,6 +10,21 @@ import os
 DOWNLOAD_DIR = 'downloades'
 os.makedirs(DOWNLOAD_DIR,exist_ok = True)
 
+DOWNLOAD_DIR = "downloads"
+os.makedirs(DOWNLOAD_DIR, exist_ok=True)
+
+def clean_downloads():
+    """Delete all old files from downloads folder."""
+    for file in os.listdir(DOWNLOAD_DIR):
+        file_path = os.path.join(DOWNLOAD_DIR, file)
+
+        try:
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+            elif os.path.isdir(file_path):
+                shutil.rmtree(file_path)
+        except Exception as e:
+            print(f"Could not delete {file_path}: {e}")
 
 def download_youtube_audio(url: str) -> str:
     output_path = os.path.join(DOWNLOAD_DIR, "%(title)s.%(ext)s")
@@ -37,12 +53,24 @@ def download_youtube_audio(url: str) -> str:
         raise Exception(f"Failed to download YouTube video.\n{e}")
 
 
+# def convert_to_wav(input_path: str) -> str:
+#     """Convert any audio/video file to WAV format using pydub."""
+#     output_path = os.path.splitext(input_path)[0] + "_converted.wav"
+#     audio = AudioSegment.from_file(input_path)
+#     audio = audio.set_channels(1).set_frame_rate(16000) #16khz
+#     audio.export(output_path, format="wav")
+#     return output_path
+
 def convert_to_wav(input_path: str) -> str:
-    """Convert any audio/video file to WAV format using pydub."""
-    output_path = os.path.splitext(input_path)[0] + "_converted.wav"
+    """Convert any local audio/video file to WAV and save it in DOWNLOAD_DIR."""
+
+    filename = os.path.splitext(os.path.basename(input_path))[0]
+    output_path = os.path.join(DOWNLOAD_DIR, f"{filename}.wav")
+
     audio = AudioSegment.from_file(input_path)
-    audio = audio.set_channels(1).set_frame_rate(16000) #16khz
+    audio = audio.set_channels(1).set_frame_rate(16000)  # 16 kHz
     audio.export(output_path, format="wav")
+
     return output_path
 
 
@@ -61,8 +89,25 @@ def chunk_audio(wav_path : str , chunk_minutes : int = 10) -> list:
     
     return chunks
 
+# def process_input(source: str) -> list:
+#     if source.startswith("http://") or source.startswith("https://"):
+#         print("Detected YouTube URL. Downloading audio...")
+#         wav_path = download_youtube_audio(source)
+#     else:
+#         print("Detected local file. Converting to WAV...")
+#         wav_path = convert_to_wav(source)
+
+#     print("Chunking audio...")
+#     chunks = chunk_audio(wav_path)
+#     print(f"Audio ready — {len(chunks)} chunk(s) created.")
+#     return chunks
+
 def process_input(source: str) -> list:
-    if source.startswith("http://") or source.startswith("https://"):
+
+    # Delete old downloaded audio and chunks
+    clean_downloads()
+
+    if source.startswith(("http://", "https://")):
         print("Detected YouTube URL. Downloading audio...")
         wav_path = download_youtube_audio(source)
     else:
@@ -73,5 +118,4 @@ def process_input(source: str) -> list:
     chunks = chunk_audio(wav_path)
     print(f"Audio ready — {len(chunks)} chunk(s) created.")
     return chunks
-
 
