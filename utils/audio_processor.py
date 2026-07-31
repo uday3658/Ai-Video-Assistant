@@ -53,7 +53,7 @@ def download_youtube_audio(url: str) -> str:
     ydl_opts = {
         "format": "bestaudio/best",
         "outtmpl": output_path,
-         "noplaylist": True,
+        "noplaylist": True,
         "postprocessors": [
             {
                 "key": "FFmpegExtractAudio",
@@ -62,6 +62,7 @@ def download_youtube_audio(url: str) -> str:
             }
         ],
         "quiet": True,
+        "js_runtimes": {"node": {}},
     }
 
     if cookie_file:
